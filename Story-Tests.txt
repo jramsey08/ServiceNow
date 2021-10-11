@@ -1,0 +1,76 @@
+Create new field on story form Test State ( Test Status)
+
+
+-Business rule runs on Test table on update
+-Query test table for all test with related story ran from business rule
+-Run through tests records
+	-If *any* Test record has Runnable version the same as Latest Version
+		-update related story record Ready
+
+
+var sRecord = current.sys_id;
+var sValue = 0;
+var target = new GlideRecord('tests'); 
+target.addQuery('story',sRecord);
+target.query();
+while(target.next()) { 
+	if(target.runnable_version = target.latest_version){
+		sValue = 1;
+	}
+}
+if(sValue = 1){
+	current.test_status = "Ready";
+}
+
+
+_________________________________________________________________________________________________________
+
+
+
+-If all of the test records Runnable versions are different from latest version
+	-Update related story record to Work in progress
+
+var sRecord = current.sys_id;
+var sValue = "";
+var target = new GlideRecord('tests'); 
+target.addQuery('story',sRecord);
+target.query();
+while(target.next()) { 
+	if(target.runnable_version = target.latest_version){
+		sValue = 1;
+	}
+}
+if(sValue = 1){
+	current.test_status = "Ready";
+}else{
+	current.test_status = "Work in Progress";
+}
+
+
+
+
+_________________________________________________________________________________________________________
+
+
+
+-If *all* test records has runnable version the same as latest version
+	-Query latest test versions from test records and confirm state of passed
+		-If all passed, then update parent story as Passes
+
+
+var sRecord = current.sys_id;
+var sCount = 0;
+var target = new GlideRecord('tests'); 
+target.addQuery('story',sRecord);
+target.query();
+while(target.next()){ 
+	if(target.runnable_version = target.latest_version){
+		if(target.result = "Passed"){
+			sCount = sCount + 1;
+		}
+	}
+}
+
+if(sCount = target.getRowCount(){
+	current.test_status = "Passed";
+}
